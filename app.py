@@ -2183,9 +2183,7 @@ with tab_map:
     render_map_tab()
 
 with tab_charts:
-    def render_charts_tab():
-        
-        def render_stop_stats_table():
+    def render_stop_stats_table():
             raw_data = st.session_state.raw_pipeline_data
             st_filtered = raw_data['st_filtered']
             actual_relative_times = raw_data['actual_relative_times']
@@ -2193,17 +2191,19 @@ with tab_charts:
             table_data = []
             for stop in st_filtered.itertuples():
                 offsets_arr = actual_relative_times.get(stop.stop_id, [])
+                sched_sec = stop.relative_sec
                 n = len(offsets_arr)
                 if n > 0:
-                    times_min = [t / 60.0 for t in offsets_arr]
+                    # Calculate deviation from schedule in minutes (+ = late, - = early)
+                    devs_min = [(t - sched_sec) / 60.0 for t in offsets_arr]
                     table_data.append({
                         "Stop": clean_stop_name(stop.stop_name),
                         "Count": n,
-                        "Min (min)": np.min(times_min),
-                        "Q1 (min)": np.percentile(times_min, 25),
-                        "Median (min)": np.median(times_min),
-                        "Q3 (min)": np.percentile(times_min, 75),
-                        "Max (min)": np.max(times_min)
+                        "Min (min)": np.min(devs_min),
+                        "Q1 (min)": np.percentile(devs_min, 25),
+                        "Median (min)": np.median(devs_min),
+                        "Q3 (min)": np.percentile(devs_min, 75),
+                        "Max (min)": np.max(devs_min)
                     })
             if table_data:
                 df = pd.DataFrame(table_data)
@@ -2212,11 +2212,11 @@ with tab_charts:
                     column_config={
                         "Stop": st.column_config.TextColumn("Stop Name"),
                         "Count": st.column_config.NumberColumn("Trips Counted"),
-                        "Min (min)": st.column_config.NumberColumn("Min (min)", format="%.1f"),
-                        "Q1 (min)": st.column_config.NumberColumn("Q1 (min)", format="%.1f"),
-                        "Median (min)": st.column_config.NumberColumn("Median (min)", format="%.1f"),
-                        "Q3 (min)": st.column_config.NumberColumn("Q3 (min)", format="%.1f"),
-                        "Max (min)": st.column_config.NumberColumn("Max (min)", format="%.1f"),
+                        "Min (min)": st.column_config.NumberColumn("Min Dev (min)", format="%+.1f"),
+                        "Q1 (min)": st.column_config.NumberColumn("Q1 Dev (min)", format="%+.1f"),
+                        "Median (min)": st.column_config.NumberColumn("Median Dev (min)", format="%+.1f"),
+                        "Q3 (min)": st.column_config.NumberColumn("Q3 Dev (min)", format="%+.1f"),
+                        "Max (min)": st.column_config.NumberColumn("Max Dev (min)", format="%+.1f"),
                     },
                     hide_index=True,
                     use_container_width=True
@@ -2295,7 +2295,7 @@ with tab_charts:
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 with st.expander("📋 View stop statistics as an accessible table", expanded=False):
-                    st.caption("Accessible data table showing arrival relative time statistics by stop.")
+                    st.caption("Accessible data table showing arrival schedule deviations (+ = late, - = early) in minutes by stop.")
                     render_stop_stats_table()
 
         with tab_stats:
@@ -2309,7 +2309,7 @@ with tab_charts:
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 with st.expander("📋 View stop statistics as an accessible table", expanded=False):
-                    st.caption("Accessible data table showing arrival relative time statistics by stop.")
+                    st.caption("Accessible data table showing arrival schedule deviations (+ = late, - = early) in minutes by stop.")
                     render_stop_stats_table()
 
         with tab_analytics:
