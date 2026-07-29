@@ -2183,7 +2183,7 @@ with tab_map:
     render_map_tab()
 
 with tab_charts:
-    def render_stop_stats_table():
+        def render_stop_stats_table():
             raw_data = st.session_state.raw_pipeline_data
             st_filtered = raw_data['st_filtered']
             actual_relative_times = raw_data['actual_relative_times']
