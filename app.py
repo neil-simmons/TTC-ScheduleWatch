@@ -2183,7 +2183,6 @@ with tab_map:
     render_map_tab()
 
 with tab_charts:
-    with tab_charts:
     def render_charts_tab():
         
         def render_stop_stats_table():
