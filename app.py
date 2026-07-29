@@ -2183,6 +2183,8 @@ with tab_map:
     render_map_tab()
 
 with tab_charts:
+    def render_charts_tab():
+        
         def render_stop_stats_table():
             raw_data = st.session_state.raw_pipeline_data
             st_filtered = raw_data['st_filtered']
